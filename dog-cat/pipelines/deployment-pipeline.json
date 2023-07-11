@@ -1,6 +1,6 @@
 {
   "pipeline": {
-    "name": "dogs-and-cats-deploy"
+    "name": "andrew-dogs-and-cats-deploy"
   },
   "description": "Deploys a model into production via the KServe Python SDK.",
   "input": {
