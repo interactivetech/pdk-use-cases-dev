@@ -1,12 +1,12 @@
 {
   "pipeline": {
-    "name": "andrew-dogs-and-cats-train"
+    "name": "andrew-objdet-train"
   },
   "description": "Detects changed files into a repository and triggers a retraining on that dataset",
   "input": {
     "pfs": {
       "name": "data",
-      "repo": "andrew-dogs-and-cats-data",
+      "repo": "objdet-data2",
       "branch": "master",
       "glob": "/",
       "empty_files": true
@@ -17,7 +17,7 @@
       "/bin/sh"
     ],
     "stdin": [
-      "python train.py --git-url https://git@github.com:/interactivetech/pdk-use-cases-dev.git --git-ref main --sub-dir dog-cat/experiment --config const.yaml --repo andrew-dogs-and-cats-data --model andrew-dogs-and-cats-model --project andrew-pdk-update"
+      "python train.py --git-url https://git@github.com:/interactivetech/pdk-use-cases-dev.git --git-ref main --sub-dir object-detection/experiment --config const.yaml --repo objdet-data2 --model andrew-objdet-model --project andrew-objdet-dev"
     ],
     "image": "vmtyler/pdk:train_0.1.1",
     "secrets": [
