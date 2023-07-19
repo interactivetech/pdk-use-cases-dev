@@ -1,6 +1,6 @@
 {
   "pipeline": {
-    "name": "andrew-objdet-train"
+    "name": "andrew-objdet-train2"
   },
   "description": "Detects changed files into a repository and triggers a retraining on that dataset",
   "input": {
