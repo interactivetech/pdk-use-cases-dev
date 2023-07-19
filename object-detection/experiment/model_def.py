@@ -251,9 +251,9 @@ class ObjectDetectionTrial(PyTorchTrial):
         return data_dir
     def build_training_data_loader(self) -> DataLoader:
         # TRAIN_DATA_DIR='determined-ai-xview-coco-dataset/train_sliced_no_neg/train_images_300_02/'
-        print("self.hparams.data_dir: ",self.hparams.data_dir)
+        data_dir = os.path.join(self.download_directory, "data")
         dataset, num_classes = build_xview_dataset_filtered(image_set='train',args=AttrDict({
-                                                'data_dir':self.hparams.data_dir,
+                                                'data_dir':data_dir,
                                                 'backend':'local',
                                                 'masks': None,
                                                 }))
