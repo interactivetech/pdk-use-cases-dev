@@ -16,11 +16,11 @@ from torch.optim.lr_scheduler import MultiStepLR
 # from utils.fcos import fcos_resnet50_fpn
 from utils.data import build_dataset,build_xview_dataset, unwrap_collate_fn, build_xview_dataset_filtered
 from utils.model import build_frcnn_model,build_frcnn_model_finetune, finetune_ssd300_vgg16, finetune_ssdlite320_mobilenet_v3_large, create_resnet152_fasterrcnn_model, create_efficientnet_b4_fasterrcnn_model, create_convnext_large_fasterrcnn_model, create_convnext_small_fasterrcnn_model, resnet152_fpn_fasterrcnn
-
+from utils.pach_download import download_full_pach_repo
 # from utils.model import get_mv3_fcos_fpn, get_resnet_fcos, get_mobileone_s4_fpn_fcos
 # from model_mobileone import get_mobileone_s4_fpn_fcos
 from lr_schedulers import WarmupWrapper
-
+import os
 import numpy as np
 from determined.pytorch import (
     DataLoader,
@@ -150,35 +150,24 @@ class COCOReducer(MetricReducer):
         loss_dict["mAP_medium"] = coco_stats[4]
         loss_dict["mAP_large"] = coco_stats[5]
         return loss_dict
+
+
+
 class ObjectDetectionTrial(PyTorchTrial):
     def __init__(self, context: PyTorchTrialContext) -> None:
         self.context = context
         self.hparams = AttrDict(self.context.get_hparams())
         print(self.hparams) 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
+        print("Download Dataset from Pachyderm...")
+        self.download_directory = (
+            f"/tmp/data-rank{self.context.distributed.get_rank()}"
+        )
+        data_dir = self.download_data()
         # define model
         print("self.hparams[model]: ",self.hparams['model'] )
         if self.hparams['model'] == 'fasterrcnn_resnet50_fpn':
             model = build_frcnn_model_finetune(3)
-        elif self.hparams['model'] == 'fcos_resnet50_fpn':
-            model = make_custom_object_detection_model_fcos(61)
-        elif self.hparams['model'] == 'mobileone_fpn':
-            model = get_mobileone_s4_fpn_fcos(61,ckpt_path='/tmp/mobileone_s4.pth.tar')
-        elif self.hparams['model'] == 'ssd300_vgg16':
-            model = finetune_ssd300_vgg16(61)
-        elif self.hparams['model'] == 'ssdlite320_mobilenet_v3_large':
-            model = finetune_ssdlite320_mobilenet_v3_large(61)
-        elif self.hparams['model'] == 'resnet152_fasterrcnn_model':
-            model = create_resnet152_fasterrcnn_model(61)
-        elif self.hparams['model'] == 'efficientnet_b4_fasterrcnn_model':
-            model = create_efficientnet_b4_fasterrcnn_model(61)
-        elif self.hparams['model'] == 'convnext_large_fasterrcnn_model':
-            model = create_convnext_large_fasterrcnn_model(61)
-        elif self.hparams['model'] == 'convnext_small_fasterrcnn_model':
-            model = create_convnext_small_fasterrcnn_model(61)
-        elif self.hparams['model'] == 'resnet152_fpn_fasterrcnn':
-            model = resnet152_fpn_fasterrcnn(61)
         # create_convnext_small_fasterrcnn_model
         
 
@@ -243,7 +232,23 @@ class ObjectDetectionTrial(PyTorchTrial):
         self.scheduler = self.context.wrap_lr_scheduler(
             scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
         )
+    def download_data(self):
+        data_config = self.context.get_data_config()
+        data_dir = os.path.join(self.download_directory, "data")
 
+        data_dir = download_full_pach_repo(
+            data_config["pachyderm"]["host"],
+            data_config["pachyderm"]["port"],
+            data_config["pachyderm"]["repo"],
+            data_config["pachyderm"]["branch"],
+            data_dir,
+            data_config["pachyderm"]["token"],
+            data_config["pachyderm"]["project"],
+            data_config["pachyderm"]["previous_commit"],
+        )
+        print(f"Data dir set to : {data_dir}")
+
+        return data_dir
     def build_training_data_loader(self) -> DataLoader:
         # TRAIN_DATA_DIR='determined-ai-xview-coco-dataset/train_sliced_no_neg/train_images_300_02/'
         print("self.hparams.data_dir: ",self.hparams.data_dir)
@@ -275,9 +280,10 @@ class ObjectDetectionTrial(PyTorchTrial):
 
     def build_validation_data_loader(self) -> DataLoader:
         # VAL_DATA_DIR='determined-ai-xview-coco-dataset/val_sliced_no_neg/val_images_300_02/'
-        print("self.hparams.data_dir: ",self.hparams.data_dir)
+        # print("self.hparams.data_dir: ",self.hparams.data_dir)
+        data_dir = os.path.join(self.download_directory, "data")
         dataset_test, _ = build_xview_dataset_filtered(image_set='val',args=AttrDict({
-                                                'data_dir':self.hparams.data_dir,
+                                                'data_dir':data_dir,
                                                 'backend':'local',
                                                 'masks': None,
                                                 }))
