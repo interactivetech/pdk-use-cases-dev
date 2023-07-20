@@ -42,6 +42,6 @@
       }
     ]
   },
-  "pod_patch": "[{\"op\": \"add\",\"path\": \"/volumes/-\",\"value\": {\"name\": \"det-checkpoints\",\"hostpath\": {\"path\": \"/nvmefs1/determined/checkpoints\",\"type\": \"Directory\"}}}, {\"op\": \"add\",\"path\": \"/containers/0/volumeMounts/-\",\"value\": {\"mountPath\": \"/determined_shared_fs\",\"name\": \"det-checkpoints\"}},{\"op\": \"add\",\"path\": \"/volumes/-\",\"value\": {\"name\": \"andrew.mendez\",\"hostpath\": {\"path\": \"/nvmefs1/andrew.mendez/-\",\"type\": \"Directory\"}}}, {\"op\": \"add\",\"path\": \"/containers/0/volumeMounts/-\",\"value\": {\"mountPath\": \"/andrew.mendez\",\"name\": \"andrew.mendez\"}}]"
+  "pod_patch": "[{\"op\": \"add\",\"path\": \"/volumes/-\",\"value\": {\"name\": \"det-checkpoints\",\"hostpath\": {\"path\": \"/nvmefs1/determined/checkpoints\",\"type\": \"Directory\"}}}, {\"op\": \"add\",\"path\": \"/containers/0/volumeMounts/-\",\"value\": {\"mountPath\": \"/determined_shared_fs\",\"name\": \"det-checkpoints\"}},{\"op\": \"add\",\"path\": \"/volumes/-\",\"value\": {\"name\": \"andrew\",\"hostpath\": {\"path\": \"/nvmefs1/-\",\"type\": \"Directory\"}}}, {\"op\": \"add\",\"path\": \"/containers/0/volumeMounts/-\",\"value\": {\"mountPath\": \"/nvmefs1\",\"name\": \"andrew\"}}]"
 
 }
