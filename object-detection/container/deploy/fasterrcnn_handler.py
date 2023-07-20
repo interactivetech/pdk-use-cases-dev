@@ -34,6 +34,23 @@ class FasterRCNNObjectDetector(ObjectDetector):
             self.model.eval()
             self.initialized = True
 
+    def inference(self, data, *args, **kwargs):
+        """
+        The Inference Function is used to make a prediction call on the given input request.
+        The user needs to override the inference function to customize it.
+
+        Args:
+            data (Torch Tensor): A Torch Tensor is passed to make the Inference Request.
+            The shape should match the model input shape.
+
+        Returns:
+            Torch Tensor : The Predicted Torch Tensor is returned in this function.
+        """
+        with torch.no_grad():
+            marshalled_data = data.to(self.device)
+            results = self.model([marshalled_data], *args, **kwargs)
+        return results
+    
     def postprocess(self, data):
         result = []
 
