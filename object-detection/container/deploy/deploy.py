@@ -44,9 +44,10 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     print(f"Checkpoint loaded in {delta} seconds.")
 
     print(f"Creating ScriptModule from Determined checkpoint...")
-
+    model = trial.model
+    model = model.eval()
     # Create ScriptModule
-    m = torch.jit.script(trial.model)
+    m = torch.jit.script(model)
 
     # Save ScriptModule to file
     torch.jit.save(m, "scriptmodule.pt")
