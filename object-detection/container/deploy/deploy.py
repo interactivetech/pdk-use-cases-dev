@@ -54,7 +54,6 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
 
     # Save model to file
     model = trial.model
-    model = model.eval()
     torch.save(model.state_dict(), "model.pth")
     print(f"ScriptModule created successfully.")
 
