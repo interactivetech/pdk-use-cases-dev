@@ -45,12 +45,13 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
 
     print(f"Creating ScriptModule from Determined checkpoint...")
     model = trial.model
-    model = model.eval()
+    model.eval()
     # Create ScriptModule
-    m = torch.jit.script(model)
+    # m = torch.jit.script(model)
 
     # Save ScriptModule to file
-    torch.jit.save(m, "scriptmodule.pt")
+    # torch.jit.save(m, "scriptmodule.pt")
+    torch.save(model.state_dict(),'model.pth')
     print(f"ScriptModule created successfully.")
 
 
@@ -68,7 +69,7 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
 def create_mar_file(model_name, model_version):
     print(f"Creating .mar file for model '{model_name}'...")
     os.system(
-        "torch-model-archiver --model-name %s --version %s --handler ./fasterrcnn_handler.py --serialized-file ./scriptmodule.pt --extra-files ./index_to_name.json --force"
+        "torch-model-archiver --model-name %s --version %s --./model-xview.py --handler ./fasterrcnn_handler.py --serialized-file ./model.pth --extra-files ./index_to_name.json --force"
         % (model_name, model_version)
     )
     print(f"Created .mar file successfully.")

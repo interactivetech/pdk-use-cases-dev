@@ -48,7 +48,7 @@ class FasterRCNNObjectDetector(ObjectDetector):
         """
         with torch.no_grad():
             marshalled_data = data.to(self.device)
-            results = self.model([marshalled_data], *args, **kwargs)
+            results = self.model(marshalled_data, *args, **kwargs)
         return results
     
     def postprocess(self, data):
