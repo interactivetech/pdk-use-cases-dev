@@ -108,7 +108,6 @@ model_snapshot={"name":"startup.cfg","modelCount":1,"models":{"%s":{"%s":{"defau
 
 # =====================================================================================
 
-
 def main():
     args = parse_args()
     det = DeterminedInfo()
