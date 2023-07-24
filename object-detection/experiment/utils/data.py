@@ -304,7 +304,7 @@ def build_xview_dataset_filtered(image_set, args):
     dataset = CocoDetection(
         args.backend,
         args.data_dir,
-        os.path.join(args.data_dir,img_folder),
+        img_folder,
         os.path.join(args.data_dir,ann_file),
         transforms=make_coco_transforms(image_set),
         return_masks=args.masks,
