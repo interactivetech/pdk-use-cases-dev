@@ -6,7 +6,7 @@
   "input": {
     "pfs": {
       "name": "data",
-      "repo": "objdet-data2",
+      "repo": "data",
       "branch": "master",
       "glob": "/",
       "empty_files": true
