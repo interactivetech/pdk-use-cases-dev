@@ -1,12 +1,12 @@
 {
   "pipeline": {
-    "name": "andrew-objdet-deploy2"
+    "name": "deploy"
   },
   "description": "Deploys a model into production via the KServe Python SDK.",
   "input": {
     "pfs": {
       "name": "data",
-      "repo": "andrew-objdet-train2",
+      "repo": "training",
       "branch": "master",
       "glob": "/"
     }
@@ -16,7 +16,7 @@
       "/bin/sh"
     ],
     "stdin": [
-      "python deploy.py --k8s-config-file /determined_shared_fs/k8s.config --deployment-name andrew-objdet-deploy --service-account-name pach-deploy --tolerations accelerator=Tesla-T4 --resource-requests cpu=10,memory=8Gi --resource-limits cpu=10,memory=8Gi"
+      "python deploy.py --k8s-config-file /determined_shared_fs/k8s.config --deployment-name detection-deploy --service-account-name pach-deploy --tolerations accelerator=Tesla-T4 --resource-requests cpu=10,memory=8Gi --resource-limits cpu=10,memory=8Gi"
     ],
     "image": "mendeza/pdk:deploy_0.0.23",
     "secrets": [

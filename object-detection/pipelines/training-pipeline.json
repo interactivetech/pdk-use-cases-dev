@@ -1,6 +1,6 @@
 {
   "pipeline": {
-    "name": "andrew-objdet-train2"
+    "name": "training"
   },
   "description": "Detects changed files into a repository and triggers a retraining on that dataset",
   "input": {
@@ -17,7 +17,7 @@
       "/bin/sh"
     ],
     "stdin": [
-      "python train.py --git-url https://git@github.com:/interactivetech/pdk-use-cases-dev.git --git-ref main --sub-dir object-detection/experiment --config const.yaml --repo objdet-data2 --model andrew-objdet-model --project andrew-objdet-dev"
+      "python train.py --git-url https://git@github.com:/interactivetech/pdk-use-cases-dev.git --git-ref main --sub-dir object-detection/experiment --config const.yaml --repo data --model objdet-model --project object-detection-demo"
     ],
     "image": "vmtyler/pdk:train_0.1.1",
     "secrets": [
