@@ -38,7 +38,7 @@ hyperparameters:
     num_workers: 4
     device: cuda
 environment:
-    image: determinedai/environments:cuda-11.3-pytorch-1.10-tf-2.8-gpu-mpi-0.19.10
+    image: mendeza/obj-det-pdk-train-env:0.0.1
     environment_variables:                                                                          
         - NCCL_DEBUG=INFO                                                                           
         # You may need to modify this to match your network configuration.                          
