@@ -181,15 +181,6 @@ class ObjectDetectionTrial(PyTorchTrial):
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         print("Converted all BatchNorm*D layers in the model to torch.nn.SyncBatchNorm layers.")
 
-
-
-        if self.hparams['finetune_ckpt'] != None:
-            checkpoint = torch.load(self.hparams['finetune_ckpt'], map_location='cpu')
-            # pass
-            # lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
-            # args.start_epoch = checkpoint['epoch'] + 1
-        if self.hparams['finetune_ckpt'] != None:
-            model.load_state_dict(checkpoint['model'])
         # wrap model
 
         self.model = self.context.wrap_model(model)
