@@ -168,13 +168,14 @@ class ObjectDetectionTrial(PyTorchTrial):
         print("self.hparams[model]: ",self.hparams['model'] )
         if self.hparams['model'] == 'fasterrcnn_resnet50_fpn':
             model = build_frcnn_model_finetune(3,ckpt=self.hparams['pretrained_model'])
+
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         print("Converted all BatchNorm*D layers in the model to torch.nn.SyncBatchNorm layers.")
-
         if self.hparams['finetune_ckpt'] != None:
+            checkpoint = torch.load(self.hparams['finetune_ckpt'], map_location='cpu')
             model.load_state_dict(checkpoint['model'])
-
         # wrap model
+
         self.model = self.context.wrap_model(model)
 
         # wrap optimizer
