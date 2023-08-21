@@ -26,7 +26,7 @@ hyperparameters:
     warmup: linear
     warmup_iters: 200
     warmup_ratio: 0.001
-    finetune_ckpt: "/lus/aiholus1/disk/andrew.mendez/model_479.pth"
+    finetune_ckpt: "/lus/aiholus1/disk/andrew.mendez/frcnn_xview.pth"
     step1: 504 # 14 epochs: 14*36 == 504
     step2: 540 # 15 epochs: 15*36 == 540
     model: fasterrcnn_resnet50_fpn
