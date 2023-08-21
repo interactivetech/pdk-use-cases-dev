@@ -167,7 +167,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         # define model
         print("self.hparams[model]: ",self.hparams['model'] )
         if self.hparams['model'] == 'fasterrcnn_resnet50_fpn':
-            model = build_frcnn_model_finetune(3)
+            model = build_frcnn_model_finetune(3,ckpt=self.finetune_ckpt)
         # create_convnext_small_fasterrcnn_model
         
 

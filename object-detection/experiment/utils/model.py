@@ -187,15 +187,15 @@ def build_frcnn_model(num_classes):
     model.box_batch_size_per_image=512
     model.box_positive_fraction=0.25
     return model
-def build_frcnn_model_finetune(num_classes):
-    print("Loading pretrained model...")
+def build_frcnn_model_finetune(num_classes,ckpt=None):
+    print("Loading pretrained model from {}...".format(ckpt))
     # load an detection model pre-trained on COCO
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
     try:
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         # replace the pre-trained head with a new one
         model.roi_heads.box_predictor = FastRCNNPredictor(in_features, 61)
-        path = os.path.join('/nvmefs1/andrew.mendez/frcnn_xview.pth')
+        path = os.path.join(ckpt)
         model=load_model_ddp(model,torch.load(path,map_location=torch.device('cpu')))
     except Exception as e:
         print(e)
