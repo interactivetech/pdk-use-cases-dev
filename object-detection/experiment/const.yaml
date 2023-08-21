@@ -26,14 +26,14 @@ hyperparameters:
     warmup: linear
     warmup_iters: 200
     warmup_ratio: 0.001
-    finetune_ckpt: "/nvmefs1/andrew.mendez/model_479.pth"
+    finetune_ckpt: "/lus/aiholus1/disk/andrew.mendez/model_479.pth"
     step1: 504 # 14 epochs: 14*36 == 504
     step2: 540 # 15 epochs: 15*36 == 540
     model: fasterrcnn_resnet50_fpn
     # Dataset
     dataset_file: coco
     backend: local # specifiy the backend you want to use.  one of: gcs, aws, fake, local
-    data_dir: "/nvmefs1/andrew.mendez/xview_dataset/" # bucket name if using gcs or aws, otherwise directory to dataset
+    data_dir: "/lus/aiholus1/disk/andrew.mendez/xview_dataset/" # bucket name if using gcs or aws, otherwise directory to dataset
     masks: false
     num_workers: 4
     device: cuda
