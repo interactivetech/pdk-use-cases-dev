@@ -163,7 +163,9 @@ class ObjectDetectionTrial(PyTorchTrial):
         self.download_directory = (
             f"/tmp/data-rank{self.context.distributed.get_rank()}"
         )
-        data_dir = self.download_data()
+        data_config = self.context.get_data_config()
+        if len(data_config.keys()) > 0: 
+            data_dir = self.download_data()
         # define model
         print("self.hparams[model]: ",self.hparams['model'] )
         if self.hparams['model'] == 'fasterrcnn_resnet50_fpn':
@@ -175,7 +177,7 @@ class ObjectDetectionTrial(PyTorchTrial):
             checkpoint = torch.load(self.hparams['finetune_ckpt'], map_location='cpu')
             model.load_state_dict(checkpoint['model'])
         # wrap model
-
+        
         self.model = self.context.wrap_model(model)
 
         # wrap optimizer
@@ -218,24 +220,32 @@ class ObjectDetectionTrial(PyTorchTrial):
         )
     def download_data(self):
         data_config = self.context.get_data_config()
-        data_dir = os.path.join(self.download_directory, "data")
-
-        data_dir = download_full_pach_repo(
-            data_config["pachyderm"]["host"],
-            data_config["pachyderm"]["port"],
-            data_config["pachyderm"]["repo"],
-            data_config["pachyderm"]["branch"],
-            data_dir,
-            data_config["pachyderm"]["token"],
-            data_config["pachyderm"]["project"],
-            data_config["pachyderm"]["previous_commit"],
-        )
-        print(f"Data dir set to : {data_dir}")
+        if len(data_config.keys()) > 0: 
+            data_dir = os.path.join(self.download_directory, "data")
+        else:
+            data_dir = self.hparams['data_dir']
+        if data_config is not None:
+            data_dir = download_full_pach_repo(
+                data_config["pachyderm"]["host"],
+                data_config["pachyderm"]["port"],
+                data_config["pachyderm"]["repo"],
+                data_config["pachyderm"]["branch"],
+                data_dir,
+                data_config["pachyderm"]["token"],
+                data_config["pachyderm"]["project"],
+                data_config["pachyderm"]["previous_commit"],
+            )
+            print(f"Data dir set to : {data_dir}")
 
         return data_dir
     def build_training_data_loader(self) -> DataLoader:
         # TRAIN_DATA_DIR='determined-ai-xview-coco-dataset/train_sliced_no_neg/train_images_300_02/'
-        data_dir = os.path.join(self.download_directory, "data")
+        data_config = self.context.get_data_config()
+        print("data_config: ",data_config)
+        if len(data_config.keys()) > 0: 
+            data_dir = os.path.join(self.download_directory, "data")
+        else:
+            data_dir = self.hparams['data_dir']
         dataset, num_classes = build_xview_dataset_filtered(image_set='train',args=AttrDict({
                                                 'data_dir':data_dir,
                                                 'backend':'local',
@@ -265,7 +275,11 @@ class ObjectDetectionTrial(PyTorchTrial):
     def build_validation_data_loader(self) -> DataLoader:
         # VAL_DATA_DIR='determined-ai-xview-coco-dataset/val_sliced_no_neg/val_images_300_02/'
         # print("self.hparams.data_dir: ",self.hparams.data_dir)
-        data_dir = os.path.join(self.download_directory, "data")
+        data_config = self.context.get_data_config()
+        if len(data_config.keys())> 0: 
+            data_dir = os.path.join(self.download_directory, "data")
+        else:
+            data_dir = self.hparams['data_dir']
         dataset_test, _ = build_xview_dataset_filtered(image_set='val',args=AttrDict({
                                                 'data_dir':data_dir,
                                                 'backend':'local',
