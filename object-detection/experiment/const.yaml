@@ -1,6 +1,6 @@
 name: Train Test
-workspace: PDK Demos
-project: pdk-object-detection
+workspace: Andrew
+project: PDK Test
 data:
     pachyderm:
         host:
