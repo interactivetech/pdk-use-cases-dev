@@ -52,8 +52,8 @@ searcher:
   metric: mAP
   smaller_is_better: true
   max_length:
-    batches: 10 # 1*(9/16) = 1*1
-records_per_epoch: 9 # 9 records / 16
+    batches: 48 # 1*(9/16) = 1*1
+records_per_epoch: 1 # 9 records / 16
 resources:
     slots_per_trial: 1
     shm_size: 2000000000
