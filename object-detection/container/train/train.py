@@ -209,11 +209,16 @@ def get_checkpoint(exp):
 
 
 def get_or_create_model(client, model_name, pipeline, repo):
-    models = client.get_models(name=model_name)
-
+    # update to use get_model rather than get_models
+    models=[]
+    try:
+        model = client.get_model(model_name)
+        models.append(model)
+    except Exception as e:
+        print(e)
     if len(models) > 0:
         print(f"Model already present. Updating it : {model_name}")
-        model = client.get_models(name=model_name)[0]
+        model = client.get_model(model_name)
     else:
         print(f"Creating a new model : {model_name}")
         model = client.create_model(
