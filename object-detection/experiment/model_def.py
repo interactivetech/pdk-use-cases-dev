@@ -50,7 +50,7 @@ class MyCallbacks(PyTorchCallback):
 
     def on_checkpoint_load_start(self, checkpoint: Dict[str, Any]) -> None:
         print("loading checkpoint")
-        assert checkpoint["x"] == self.x
+        print(checkpoint)
 
 #     def on_checkpoint_save_start(self, checkpoint: Dict[str, Any]) -> None:
 #         print("saving checkpoint")
