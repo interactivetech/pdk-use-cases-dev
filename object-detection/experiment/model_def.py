@@ -40,6 +40,36 @@ from determined.pytorch import (
 
 TorchData = Union[Dict[str, torch.Tensor], Sequence[torch.Tensor], torch.Tensor]
 
+class MyCallbacks(PyTorchCallback):
+    def __init__(self, cat_mapping=3) -> None:
+        self.cat_mapping = cat_mapping
+        self.output_json_file = None
+        super().__init__()
+
+    def on_checkpoint_load_start(self, checkpoint: Dict[str, Any]) -> None:
+        print("loading checkpoint")
+        assert checkpoint["x"] == self.x
+
+#     def on_checkpoint_save_start(self, checkpoint: Dict[str, Any]) -> None:
+#         print("saving checkpoint")
+#         checkpoint["x"] = self.x
+
+#     def on_checkpoint_write_end(self, checkpoint_dir: str) -> None:
+#         print(f"checkpoint dir: {checkpoint_dir}")
+
+    def on_checkpoint_save_start(self,checkpoint: Dict[str, Any]):
+        print("saving checkpoint")
+        checkpoint['index_to_name'] = self.cat_mapping
+        print("self.cat_mapping: ",self.cat_mapping)
+        print("checkpoint[\'index_to_name\']=",checkpoint['index_to_name'])
+    def on_checkpoint_write_end(self, checkpoint_dir: str):
+        print(f"checkpoint dir: {checkpoint_dir}")
+        # Write the category mapping to the output JSON file
+        self.output_json_file = os.path.join(checkpoint_dir,'index_to_name.json')
+        with open(self.output_json_file, 'w') as f:
+            json.dump(self.cat_mapping, f, indent=4)
+            print("--Saved: {}".format(self.output_json_file))
+            
 def convert_to_coco_api(ds):
     coco_ds = COCO()
     # annotation IDs need to start at 1, not 0, see torchvision issue #1530
@@ -151,7 +181,49 @@ class COCOReducer(MetricReducer):
         loss_dict["mAP_large"] = coco_stats[5]
         return loss_dict
 
+def convert_coco_categories(coco_json_file, output_json_file):
+    """
+    Converts COCO JSON category data to a custom JSON format.
 
+    Args:
+        coco_json_file (str): Path to the input COCO JSON annotation file.
+        output_json_file (str): Path to the output JSON file to be created.
+
+    Raises:
+        FileNotFoundError: If the input COCO JSON file does not exist.
+        ValueError: If the input files are not valid JSON files.
+    Returns:
+        cat_mapping
+        n_classes
+    """
+    # Check if the input COCO JSON file exists
+    if not os.path.isfile(coco_json_file):
+        raise FileNotFoundError(f"Input file '{coco_json_file}' not found.")
+
+    # # Check if the output JSON file already exists
+    # if os.path.isfile(output_json_file):
+    #     raise FileExistsError(f"Output file '{output_json_file}' already exists. Please choose a different name.")
+
+    with open(coco_json_file, 'r') as f:
+        try:
+            coco_data = json.load(f)
+        except json.JSONDecodeError:
+            raise ValueError(f"Invalid JSON format in input file '{coco_json_file}'.")
+
+    categories = coco_data['categories']
+
+    # Create a dictionary with category IDs as keys and category names as values
+    category_mapping = {str(category['id']): category['name'] for category in categories}
+    n_classes = len(list(category_mapping.keys()))
+    print("N_CLASSES: {}".format(n_classes))
+    print("category_mapping: ",category_mapping)
+    # Add "__background__" as ID 0
+    category_mapping['0'] = '__background__'
+
+    # Write the category mapping to the output JSON file
+    with open(output_json_file, 'w') as f:
+        json.dump(category_mapping, f, indent=4)
+    return category_mapping, n_classes
 
 class ObjectDetectionTrial(PyTorchTrial):
     def __init__(self, context: PyTorchTrialContext) -> None:
@@ -164,18 +236,52 @@ class ObjectDetectionTrial(PyTorchTrial):
             f"/tmp/data-rank{self.context.distributed.get_rank()}"
         )
         data_config = self.context.get_data_config()
+        n_classes = -1 # default for 2 class xview dataset
         if len(data_config.keys()) > 0: 
+            print("Download Dataset from Pachyderm...")
+            
             data_dir = self.download_data()
+            # 
+            data_dir = os.path.join(self.download_directory, "data")
+            print("data_dir: {}".format(data_dir))
+            self.local_coco_json_path = os.path.join(data_dir,'train_images_rgb_no_neg_filt_32/train_640_02_filtered_32.json')
+            # convert json file to index_to_name.json for deployment
+            self.output_json_file = 'index_to_name.json'  # Replace with the desired output file name
+            self.cat_mapping, n_cl = convert_coco_categories(self.local_coco_json_path, self.output_json_file)
+            print("exported {}.".format(self.output_json_file))
+            n_classes = n_cl
+            print("Number of classes in the coco annotation dataset: {} : {}".format(data_dir,n_classes))
+        else:
+            # get download dir from hparams
+            data_dir = self.hparams['data_dir']
+            print("data_dir: {}".format(data_dir))
+            self.local_coco_json_path = os.path.join(data_dir,'train_images_rgb_no_neg_filt_32/train_640_02_filtered_32.json')
+            # convert json file to index_to_name.json for deployment
+            self.output_json_file = 'index_to_name.json'  # Replace with the desired output file name
+            self.cat_mapping, n_cl = convert_coco_categories(self.local_coco_json_path, self.output_json_file)
+            print("exported index_to_name.json.")
+            n_classes = n_cl
+            print("Number of classes in the coco annotation dataset: {} : {}".format(data_dir,n_classes))
+
+        assert n_classes != -1, "n_classes has not been extracted"# Make sure number of classes is extracted
+
         # define model
         print("self.hparams[model]: ",self.hparams['model'] )
         if self.hparams['model'] == 'fasterrcnn_resnet50_fpn':
-            model = build_frcnn_model_finetune(3,ckpt=self.hparams['pretrained_model'])
+            n_classes+=1# Make sure to add +1 to n_classes because FasterRCNN Torchvision expects class id 0 to be background
+            # Coco Annotation Files do not expect background class to be annotated
+            model = build_frcnn_model_finetune(n_classes,ckpt=self.hparams['pretrained_model'])
 
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         print("Converted all BatchNorm*D layers in the model to torch.nn.SyncBatchNorm layers.")
         if self.hparams['finetune_ckpt'] != None:
-            checkpoint = torch.load(self.hparams['finetune_ckpt'], map_location='cpu')
-            model.load_state_dict(checkpoint['model'])
+            try:
+                print("trying to load: {}".format(self.hparams['finetune_ckpt'][str(n_classes)]))
+                checkpoint = torch.load(self.hparams['finetune_ckpt'][str(n_classes)], map_location='cpu')
+                model.load_state_dict(checkpoint['model'][str(n_classes)])
+            except Exception as e:
+                print("Loading model from {} failed. Continuing...".format(self.hparams['finetune_ckpt'][str(n_classes)]))
+                print(e)
         # wrap model
         
         self.model = self.context.wrap_model(model)
@@ -218,6 +324,10 @@ class ObjectDetectionTrial(PyTorchTrial):
         self.scheduler = self.context.wrap_lr_scheduler(
             scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
         )
+        
+    def build_callbacks(self) -> Dict[str, PyTorchCallback]:
+        return {"my_callbacks": MyCallbacks(cat_mapping=self.cat_mapping)}
+
     def download_data(self):
         data_config = self.context.get_data_config()
         if len(data_config.keys()) > 0: 
