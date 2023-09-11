@@ -23,6 +23,8 @@ from lr_schedulers import WarmupWrapper
 import os
 import json
 import numpy as np
+import determined
+print("DETERMINED VERSION: {}".format(determined.__version__))
 from determined.pytorch import (
     DataLoader,
     LRScheduler,
