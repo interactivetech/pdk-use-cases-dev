@@ -28,6 +28,7 @@ from determined.pytorch import (
     PyTorchTrial,
     PyTorchTrialContext,
     MetricReducer,
+    PyTorchCallback
 )
 # from coco_eval import CocoEvaluator
 
