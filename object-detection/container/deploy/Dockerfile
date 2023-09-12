@@ -8,8 +8,8 @@ RUN pip install -r requirements.txt
 COPY deploy.py /app
 COPY common.py /app
 COPY fasterrcnn_handler.py /app
-COPY index_to_name.json /app
-COPY model-xview.py /app
+# COPY index_to_name.json /app
+COPY model-xview-template.py /app
 
 
 ENV PYTHONUNBUFFERED=1
