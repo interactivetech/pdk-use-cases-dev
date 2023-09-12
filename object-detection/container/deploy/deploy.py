@@ -4,7 +4,7 @@ import time
 import torch
 from determined.experimental import Determined
 from determined.pytorch import load_trial_from_checkpoint_path
-
+import json
 from kserve import KServeClient
 from common import (
     upload_model,
@@ -64,7 +64,7 @@ def create_model_file_and_json(path, template_file, output_file):
     Example usage:
     create_model_file_and_json('/path/to/model', 'template.py', 'index_to_name.json')
     '''
-    model_state_dict = torch.load(path + '/state_dict.pth')
+    model_state_dict = torch.load(path + '/state_dict.pth',map_location=torch.device('cpu'))
     # Get JSON saved in checkpoint key: index_to_name
     index_to_name_json = model_state_dict['index_to_name']
     n_classes = len(list(index_to_name_json.keys()))

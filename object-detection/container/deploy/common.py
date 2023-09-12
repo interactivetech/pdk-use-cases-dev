@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 from functools import partial
-
+import torch
 import yaml
 from determined.common.experimental import ModelVersion
 from google.cloud import storage
