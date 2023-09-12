@@ -20,7 +20,64 @@ from common import (
 
 # =====================================================================================
 
+def generate_model_file(template_file: str,output_file: str, num_classes: int):
+    """
+    Generate a Python model file based on a template, injecting a value into the template.
 
+    Args:
+        output_file (str): The name of the output Python file where the generated code will be saved.
+        num_classes (int): The number of classes for the model.
+
+    Example:
+        generate_model_file('model-file.py', num_classes=10)
+    """
+    # Read the template file
+    with open(template_file, 'r') as template_file:
+        template = template_file.read()
+    # print(templ)
+#     # Replace the placeholders with the provided values
+    updated_template = template.replace('{}', str(num_classes))
+    print(updated_template)
+    # Save the updated template as the output file
+    with open(output_file, 'w') as output:
+        output.write(updated_template)
+# =====================================================================================
+def create_model_file_and_json(path, template_file, output_file):
+    '''
+    Generates a Python script and a JSON file for Torch-Model-Archiver.
+
+    Torch-Model-Archiver requires two key inputs:
+    1. --model-file: Defines the Faster R-CNN model and specifies the number of classes.
+    2. --extra-files: Specifies an index-to-name JSON file to map class names to category IDs.
+
+    Args:
+    - path (str): The path to the directory containing the model state dictionary file ('state_dict.pth').
+    - template_file (str): The template Python script file used for generating the model file.
+    - output_file (str): The name of the output JSON file ('index_to_name.json') for mapping class names.
+
+    The function loads the model's state dictionary from 'path', extracts the 'index_to_name' JSON dictionary
+    from the checkpoint, and saves it to 'output_file'. It then generates a model file using 'template_file'
+    with the specified number of classes and returns.
+
+    Note: Make sure 'path' contains 'state_dict.pth' with the 'index_to_name' JSON.
+
+    Example usage:
+    create_model_file_and_json('/path/to/model', 'template.py', 'index_to_name.json')
+    '''
+    model_state_dict = torch.load(path + '/state_dict.pth')
+    # Get JSON saved in checkpoint key: index_to_name
+    index_to_name_json = model_state_dict['index_to_name']
+    n_classes = len(list(index_to_name_json.keys()))
+    print("n_classes:", n_classes)
+    # Save the dictionary to a JSON file
+    with open(output_file, 'w') as output:
+        json.dump(index_to_name_json, output, indent=4)
+
+    # Generate the model file using the template
+    generate_model_file(template_file, output_file, num_classes=n_classes)
+    del model_state_dict
+    return
+# =====================================================================================
 def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     print(
         f"Loading model version '{model_name}/{pach_id}' from master at '{det_master}...'"
@@ -46,6 +103,12 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     print(f"Creating ScriptModule from Determined checkpoint...")
     model = trial.model
     model.eval()
+    
+    # 9.12.23: get index_to_name dictionary saved in checkpoint
+    print("Creating model-xview.py and creating index_to_name.json...")
+    create_model_file_and_json(checkpoint_dir,'model-xview-template.py','model-xview.py')
+    print("Done!")
+    
     # Create ScriptModule
     # m = torch.jit.script(model)
 
@@ -127,7 +190,7 @@ def main():
     create_scriptmodule(
         det.master, det.username, det.password, model.name, model.version
     )
-
+    
     # Create .mar file from ScriptModule
     create_mar_file(model.name, model.version)
 
