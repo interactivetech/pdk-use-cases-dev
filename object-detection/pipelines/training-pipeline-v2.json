@@ -19,7 +19,7 @@
     "stdin": [
       "python train-v2.py --git-url https://git@github.com:/interactivetech/pdk-use-cases-dev.git --git-ref main --sub-dir object-detection/experiment --config const.yaml --repo data --model sat-detection --project object-detection-demo"
     ],
-    "image": "mendeza/train_0.1.2",
+    "image": "mendeza/train_0.1.3",
     "secrets": [
       {
         "name": "pipeline-secret",
