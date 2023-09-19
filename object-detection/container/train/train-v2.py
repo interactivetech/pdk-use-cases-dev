@@ -193,9 +193,9 @@ def execute_experiment(
 def run_experiment(client, configfile, code_path, model):
     version = model.get_version()
 
-    if version is None:
-        print("Creating a new experiment on DeterminedAI...")
-        return execute_experiment(client, configfile, code_path, None)
+    # if version is None:
+    print("Creating a new experiment on DeterminedAI...")
+    return execute_experiment(client, configfile, code_path, None)
     # else: # Commented Andrew(9.18.2023)
     #     print("Continuing experiment on DeterminedAI...")
     #     return execute_experiment(
