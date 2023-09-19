@@ -243,7 +243,7 @@ def create_model(client, model_name, pipeline, repo):
     This will force that no model is in the registry, or error that a model needs to be deleted
     '''
     print(f"Creating a new model : {model_name}")
-        model = client.create_model(
+    model = client.create_model(
             name=model_name,
             labels=[pipeline, repo],
             metadata={"pipeline": pipeline, "repository": repo},
