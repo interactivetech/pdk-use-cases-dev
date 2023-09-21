@@ -52,7 +52,7 @@ min_validation_period:
 searcher:
   name: single
   metric: mAP
-  smaller_is_better: False
+  smaller_is_better: True
   max_length:
     batches: 48
 resources:
