@@ -1,6 +1,6 @@
 name: Train Test
 workspace: Andrew
-project: PDK Test
+project: PDK Demo
 data:
     pachyderm:
         host:
