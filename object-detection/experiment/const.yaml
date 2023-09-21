@@ -1,4 +1,4 @@
-name: Train Test
+name: PDK Object Detection Demo
 workspace: Andrew
 project: PDK Demo
 data:
@@ -52,10 +52,9 @@ min_validation_period:
 searcher:
   name: single
   metric: mAP
-  smaller_is_better: true
+  smaller_is_better: False
   max_length:
-    batches: 48 # 1*(9/16) = 1*1
-records_per_epoch: 2 # 9 records / 16
+    batches: 48
 resources:
     slots_per_trial: 1
     shm_size: 2000000000
