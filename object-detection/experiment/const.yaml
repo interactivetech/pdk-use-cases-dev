@@ -54,7 +54,7 @@ searcher:
   metric: mAP
   smaller_is_better: True
   max_length:
-    batches: 48
+    batches: 480
 resources:
     slots_per_trial: 1
     shm_size: 2000000000
