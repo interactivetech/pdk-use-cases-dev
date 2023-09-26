@@ -16,7 +16,7 @@ class FasterRCNNObjectDetector(ObjectDetector):
     """
 
     image_processing = transforms.Compose([transforms.ToTensor()])
-    threshold = 0.05
+    threshold = 0.2
 
     def initialize(self, context):
         super().initialize(context)
