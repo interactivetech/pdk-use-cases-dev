@@ -53,9 +53,9 @@ def build_frcnn_model_finetune(num_classes,ckpt=None):
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-    print("Loading checkpoint...")
-    model=load_model_ddp(model,ckpt)
-    print("Done!")
+    # print("Loading checkpoint...")
+    # model=load_model_ddp(model,ckpt)
+    # print("Done!")
     return model
 
 # =====================================================================================
@@ -136,7 +136,10 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     n_classes = len(list(index_to_name_json.keys()))
     print("--n_classes:", n_classes)
     ckpt = model_state_dict['models_state_dict'][0]
-    model = build_frcnn_model_finetune(num_classes=n_classes,ckpt=model_state_dict)
+    model = build_frcnn_model_finetune(num_classes=n_classes,ckpt=None)
+    print("Loading Checkpoint...")
+    model.load_state_dict(ckpt)
+    print("Done!")
     # trial = load_trial_from_checkpoint_path(
     #     checkpoint_dir, map_location=torch.device("cpu")
     # )
