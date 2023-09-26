@@ -276,8 +276,8 @@ class ObjectDetectionTrial(PyTorchTrial):
             # Coco Annotation Files do not expect background class to be annotated
             model = build_frcnn_model_finetune(n_classes,ckpt=self.hparams['pretrained_model'])
 
-        model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
-        print("Converted all BatchNorm*D layers in the model to torch.nn.SyncBatchNorm layers.")
+        # model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)# use if doing DDP
+        # print("Converted all BatchNorm*D layers in the model to torch.nn.SyncBatchNorm layers.")
         if self.hparams['finetune_ckpt'] != None:
             try:
                 print("trying to load: {}".format(self.hparams['finetune_ckpt'][str(n_classes)]))
