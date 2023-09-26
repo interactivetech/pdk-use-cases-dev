@@ -24,8 +24,8 @@ hyperparameters:
     warmup_iters: 100
     warmup_ratio: 0.1 # The fraction between 0-1 that defines the percentage of lr you want to start the lr at
     finetune_ckpt: 
-        3: "/lus/aiholus1/disk/andrew.mendez/model_479.pth"
-        4: "/lus/aiholus1/disk/andrew.mendez/model_399_3_class.pth"
+        3: "/lus/aiholus1/disk/andrew.mendez/frcnn_3_xview.pth"
+        4: "/lus/aiholus1/disk/andrew.mendez/frcnn_4_xview.pth"
     pretrained_model: "/lus/aiholus1/disk/andrew.mendez/frcnn_xview.pth"
     #finetune_ckpt: "/lus/aiholus1/disk/andrew.mendez/model_479.pth"
     step1: 280 
@@ -54,7 +54,7 @@ searcher:
   metric: mAP
   smaller_is_better: True
   max_length:
-    batches: 48
+    batches: 96
 resources:
     slots_per_trial: 1
     shm_size: 2000000000
