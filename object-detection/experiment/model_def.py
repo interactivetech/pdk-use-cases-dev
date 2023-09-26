@@ -282,7 +282,7 @@ class ObjectDetectionTrial(PyTorchTrial):
             try:
                 print("trying to load: {}".format(self.hparams['finetune_ckpt'][str(n_classes)]))
                 checkpoint = torch.load(self.hparams['finetune_ckpt'][str(n_classes)], map_location='cpu')
-                model.load_state_dict(checkpoint['model'][str(n_classes)])
+                model.load_state_dict(checkpoint)
             except Exception as e:
                 print("Loading model from {} failed. Continuing...".format(self.hparams['finetune_ckpt'][str(n_classes)]))
                 print(e)
@@ -372,7 +372,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         #                                         'backend':self.hparams.backend,
         #                                         'masks': self.hparams.masks,
         #                                         }))
-        train_sampler = torch.utils.data.RandomSampler(dataset)
+        # train_sampler = torch.utils.data.RandomSampler(dataset)
         # group_ids = create_aspect_ratio_groups(dataset, k=3)
         # train_batch_sampler = GroupedBatchSampler(train_sampler, 
         #                                           group_ids, 
@@ -408,11 +408,11 @@ class ObjectDetectionTrial(PyTorchTrial):
             for_validation=True,
             
         )
-        test_sampler = torch.utils.data.SequentialSampler(dataset_test)
+        # test_sampler = torch.utils.data.SequentialSampler(dataset_test)
         data_loader_test = DataLoader(
                             dataset_test,
                             batch_size=self.context.get_per_slot_batch_size(),
-                            sampler=test_sampler,
+                            shuffle=False,
                             num_workers=self.hparams.num_workers,
                             collate_fn=unwrap_collate_fn)
         self.test_length = len(data_loader_test)# batch size of 2
