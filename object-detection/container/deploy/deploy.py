@@ -131,7 +131,7 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     version = get_version(client, model_name, pach_id)
     checkpoint = version.checkpoint
     checkpoint_dir = checkpoint.download()
-    model_state_dict = torch.load(path + '/state_dict.pth',map_location=torch.device('cpu'))
+    model_state_dict = torch.load(checkpoint_dir + '/state_dict.pth',map_location=torch.device('cpu'))
     index_to_name_json = model_state_dict['index_to_name']
     n_classes = len(list(index_to_name_json.keys()))
     print("--n_classes:", n_classes)
