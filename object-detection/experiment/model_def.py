@@ -425,8 +425,8 @@ class ObjectDetectionTrial(PyTorchTrial):
 
         batch_time_start = time.time()
         images, targets = batch
-        images = list(image.to(self.device ,non_blocking=True) for image in images)
-        targets = [{k: v.to(self.device ,non_blocking=True) for k, v in t.items()} for t in targets]
+        images = list(image.to(self.device) for image in images)
+        targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
         loss_dict = self.model(images, targets)
         losses_reduced = sum(loss for loss in loss_dict.values())
         loss_value = losses_reduced.item()
