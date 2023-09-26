@@ -434,7 +434,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         self.context.step_optimizer(self.optimizer)
         # self.scheduler.step()
         total_batch_time = time.time() - batch_time_start
-        loss_dict['lr'] = self.scheduler.get_lr()[0]
+        # loss_dict['lr'] = self.scheduler.get_lr()[0]
         loss_dict['tr_time'] = total_batch_time
         # total_batch_time_str = str(datetime.timedelta(seconds=int(total_batch_time)))
         # print(f"Training time {total_batch_time_str}")
@@ -461,7 +461,7 @@ class ObjectDetectionTrial(PyTorchTrial):
 
         # Run after losses_reduced run:
         loss_dict['model_time'] = model_time
-        loss_dict['lr'] = self.scheduler.get_lr()[0]
+        # loss_dict['lr'] = self.scheduler.get_lr()[0]
         # if batch_idx%10 == 0:
         #     # is batch idx at 16, or per slot(2 )? I think globally
         #     print("{}% done: {}".format((batch_idx+1)/(self.test_length/8),loss_dict,))
