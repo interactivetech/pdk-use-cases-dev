@@ -311,23 +311,23 @@ class ObjectDetectionTrial(PyTorchTrial):
         #                                                     gamma=self.hparams.gamma)
         # self.lr_scheduler = self.context.wrap_lr_scheduler(lr_scheduler,
         #                                                    step_mode=LRScheduler.StepMode.STEP_EVERY_EPOCH)
-        # scheduler_cls = WarmupWrapper(MultiStepLR)
-        # print("self.hparams[warmup]:",self.hparams["warmup"])
-        # print("self.hparams[warmup_iters]:",self.hparams["warmup_iters"])
-        # print("self.hparams[warmup_ratio]:",self.hparams["warmup_ratio"])
-        # print("self.hparams[step1]:",self.hparams["step1"])
-        # print("self.hparams[step2]:",self.hparams["step2"])
-        # scheduler = scheduler_cls(
-        #     self.hparams["warmup"],  # warmup schedule
-        #     self.hparams["warmup_iters"],  # warmup_iters
-        #     self.hparams["warmup_ratio"],  # warmup_ratio
-        #     self.optimizer,
-        #     [self.hparams["step1"], self.hparams["step2"]],  # milestones
-        #     self.hparams["gamma"],  # gamma
-        # )
-        # self.scheduler = self.context.wrap_lr_scheduler(
-        #     scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
-        # )
+        scheduler_cls = WarmupWrapper(MultiStepLR)
+        print("self.hparams[warmup]:",self.hparams["warmup"])
+        print("self.hparams[warmup_iters]:",self.hparams["warmup_iters"])
+        print("self.hparams[warmup_ratio]:",self.hparams["warmup_ratio"])
+        print("self.hparams[step1]:",self.hparams["step1"])
+        print("self.hparams[step2]:",self.hparams["step2"])
+        scheduler = scheduler_cls(
+            self.hparams["warmup"],  # warmup schedule
+            self.hparams["warmup_iters"],  # warmup_iters
+            self.hparams["warmup_ratio"],  # warmup_ratio
+            self.optimizer,
+            [self.hparams["step1"], self.hparams["step2"]],  # milestones
+            self.hparams["gamma"],  # gamma
+        )
+        self.scheduler = self.context.wrap_lr_scheduler(
+            scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
+        )
         
     def build_callbacks(self) -> Dict[str, PyTorchCallback]:
         return {"my_callbacks": MyCallbacks(cat_mapping=self.cat_mapping)}
@@ -432,9 +432,9 @@ class ObjectDetectionTrial(PyTorchTrial):
         loss_value = losses_reduced.item()
         self.context.backward(losses_reduced)
         self.context.step_optimizer(self.optimizer)
-        # self.scheduler.step()
+        self.scheduler.step()
         total_batch_time = time.time() - batch_time_start
-        # loss_dict['lr'] = self.scheduler.get_lr()[0]
+        loss_dict['lr'] = self.scheduler.get_lr()[0]
         loss_dict['tr_time'] = total_batch_time
         # total_batch_time_str = str(datetime.timedelta(seconds=int(total_batch_time)))
         # print(f"Training time {total_batch_time_str}")
@@ -483,7 +483,7 @@ class ObjectDetectionTrial(PyTorchTrial):
 
         # Run after losses_reduced run:
         loss_dict['model_time'] = model_time
-        # loss_dict['lr'] = self.scheduler.get_lr()[0]
+        loss_dict['lr'] = self.scheduler.get_lr()[0]
         # if batch_idx%10 == 0:
         #     # is batch idx at 16, or per slot(2 )? I think globally
         #     print("{}% done: {}".format((batch_idx+1)/(self.test_length/8),loss_dict,))
