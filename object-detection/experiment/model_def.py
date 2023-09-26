@@ -311,23 +311,23 @@ class ObjectDetectionTrial(PyTorchTrial):
         #                                                     gamma=self.hparams.gamma)
         # self.lr_scheduler = self.context.wrap_lr_scheduler(lr_scheduler,
         #                                                    step_mode=LRScheduler.StepMode.STEP_EVERY_EPOCH)
-        scheduler_cls = WarmupWrapper(MultiStepLR)
-        print("self.hparams[warmup]:",self.hparams["warmup"])
-        print("self.hparams[warmup_iters]:",self.hparams["warmup_iters"])
-        print("self.hparams[warmup_ratio]:",self.hparams["warmup_ratio"])
-        print("self.hparams[step1]:",self.hparams["step1"])
-        print("self.hparams[step2]:",self.hparams["step2"])
-        scheduler = scheduler_cls(
-            self.hparams["warmup"],  # warmup schedule
-            self.hparams["warmup_iters"],  # warmup_iters
-            self.hparams["warmup_ratio"],  # warmup_ratio
-            self.optimizer,
-            [self.hparams["step1"], self.hparams["step2"]],  # milestones
-            self.hparams["gamma"],  # gamma
-        )
-        self.scheduler = self.context.wrap_lr_scheduler(
-            scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
-        )
+        # scheduler_cls = WarmupWrapper(MultiStepLR)
+        # print("self.hparams[warmup]:",self.hparams["warmup"])
+        # print("self.hparams[warmup_iters]:",self.hparams["warmup_iters"])
+        # print("self.hparams[warmup_ratio]:",self.hparams["warmup_ratio"])
+        # print("self.hparams[step1]:",self.hparams["step1"])
+        # print("self.hparams[step2]:",self.hparams["step2"])
+        # scheduler = scheduler_cls(
+        #     self.hparams["warmup"],  # warmup schedule
+        #     self.hparams["warmup_iters"],  # warmup_iters
+        #     self.hparams["warmup_ratio"],  # warmup_ratio
+        #     self.optimizer,
+        #     [self.hparams["step1"], self.hparams["step2"]],  # milestones
+        #     self.hparams["gamma"],  # gamma
+        # )
+        # self.scheduler = self.context.wrap_lr_scheduler(
+        #     scheduler, step_mode=LRScheduler.StepMode.MANUAL_STEP
+        # )
         
     def build_callbacks(self) -> Dict[str, PyTorchCallback]:
         return {"my_callbacks": MyCallbacks(cat_mapping=self.cat_mapping)}
@@ -421,6 +421,8 @@ class ObjectDetectionTrial(PyTorchTrial):
         return data_loader_test
     
     def train_batch(self, batch: TorchData, epoch_idx: int, batch_idx: int) -> Dict[str, torch.Tensor]:
+        print("(train_batch) Is model training mode?: ",model.training)
+
         batch_time_start = time.time()
         images, targets = batch
         images = list(image.to(self.device ,non_blocking=True) for image in images)
@@ -430,7 +432,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         loss_value = losses_reduced.item()
         self.context.backward(losses_reduced)
         self.context.step_optimizer(self.optimizer)
-        self.scheduler.step()
+        # self.scheduler.step()
         total_batch_time = time.time() - batch_time_start
         loss_dict['lr'] = self.scheduler.get_lr()[0]
         loss_dict['tr_time'] = total_batch_time
@@ -439,6 +441,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         return loss_dict
     
     def evaluate_batch(self, batch: TorchData,batch_idx: int) -> Dict[str, Any]:
+        print("(evaluate_batch) Is model training mode?: ",model.training)
         images, targets = batch
         model_time_start = time.time()
         # loss_dict, outputs = self.model(images, targets)
