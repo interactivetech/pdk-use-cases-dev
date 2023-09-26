@@ -69,7 +69,7 @@ def load_model_ddp(loaded_model,model_state_dict):
         # module prefix to the checkpointed data
         if isinstance(loaded_model, torch.nn.parallel.DistributedDataParallel):
             print("Loading non-DDP checkpoint into a DDP model.")
-            self._add_prefix_in_state_dict_if_not_present(model_state_dict, "module.")
+            torch.nn.modules.utils._add_prefix_in_state_dict_if_not_present(model_state_dict, "module.")
         else:
             # If the checkpointed model is DDP and if we are currently running in
             # single-slot mode, remove the module prefix from checkpointed data
