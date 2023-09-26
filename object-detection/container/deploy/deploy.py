@@ -80,7 +80,7 @@ def load_model_ddp(loaded_model,model_state_dict):
         loaded_model.load_state_dict(model_state_dict)
     return loaded_model
 # =====================================================================================
-def create_model_file_and_json(path, template_file, output_file):
+def create_model_file_and_json(path, template_file, output_file,output_json_file):
     '''
     Generates a Python script and a JSON file for Torch-Model-Archiver.
 
@@ -100,7 +100,7 @@ def create_model_file_and_json(path, template_file, output_file):
     Note: Make sure 'path' contains 'state_dict.pth' with the 'index_to_name' JSON.
 
     Example usage:
-    create_model_file_and_json('/path/to/model', 'template.py', 'index_to_name.json')
+    create_model_file_and_json('/path/to/model', 'template.py','out.py', 'index_to_name.json')
     '''
     model_state_dict = torch.load(path + '/state_dict.pth',map_location=torch.device('cpu'))
     # Get JSON saved in checkpoint key: index_to_name
@@ -108,9 +108,10 @@ def create_model_file_and_json(path, template_file, output_file):
     n_classes = len(list(index_to_name_json.keys()))
     print("n_classes:", n_classes)
     # Save the dictionary to a JSON file
-    with open(output_file, 'w') as output:
+    with open(output_json_file, 'w') as output:
         json.dump(index_to_name_json, output, indent=4)
-
+    with open(output_json_file, 'r') as output:
+        print(json.load(output))
     # Generate the model file using the template
     generate_model_file(template_file, output_file, num_classes=n_classes)
     del model_state_dict
@@ -134,6 +135,7 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     model_state_dict = torch.load(checkpoint_dir + '/state_dict.pth',map_location=torch.device('cpu'))
     index_to_name_json = model_state_dict['index_to_name']
     n_classes = len(list(index_to_name_json.keys()))
+    generate_model_file()
     print("--n_classes:", n_classes)
     ckpt = model_state_dict['models_state_dict'][0]
     model = build_frcnn_model_finetune(num_classes=n_classes,ckpt=None)
@@ -154,7 +156,7 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     
     # 9.12.23: get index_to_name dictionary saved in checkpoint
     print("Creating model-xview.py and creating index_to_name.json...")
-    create_model_file_and_json(checkpoint_dir,'model-xview-template.py','model-xview.py')
+    create_model_file_and_json(checkpoint_dir,'model-xview-template.py','model-xview.py','index_to_name.json')
     print("Done!")
     
     # Create ScriptModule
