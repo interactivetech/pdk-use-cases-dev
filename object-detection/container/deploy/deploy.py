@@ -135,7 +135,6 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     model_state_dict = torch.load(checkpoint_dir + '/state_dict.pth',map_location=torch.device('cpu'))
     index_to_name_json = model_state_dict['index_to_name']
     n_classes = len(list(index_to_name_json.keys()))
-    generate_model_file()
     print("--n_classes:", n_classes)
     ckpt = model_state_dict['models_state_dict'][0]
     model = build_frcnn_model_finetune(num_classes=n_classes,ckpt=None)
