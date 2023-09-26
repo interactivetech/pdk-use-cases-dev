@@ -18,7 +18,7 @@
     "stdin": [
       "python deploy.py --k8s-config-file /lus/aiholus1/disk/andrew.mendez/k8s-a.config --deployment-name detection-deploy --service-account-name pach-deploy --tolerations accelerator=Tesla-T4 --resource-requests cpu=10,memory=8Gi --resource-limits cpu=10,memory=8Gi"
     ],
-    "image": "mendeza/pdk:deploy_0.0.25",
+    "image": "mendeza/pdk:deploy_0.0.26",
     "secrets": [
       {
         "name": "pipeline-secret",
