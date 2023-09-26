@@ -452,24 +452,24 @@ class ObjectDetectionTrial(PyTorchTrial):
         model_time = time.time() - model_time_start
         losses_reduced = sum(loss for loss in loss_dict.values())
         outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
+        with torch.no_grad():
+            merged_scores = torch.cat([d['scores'] for d in outputs])
+            min_value = torch.min(merged_scores)
+            max_value = torch.max(merged_scores)
+            percentile_50 = torch.quantile(merged_scores, 0.5)
+            percentile_95 = torch.quantile(merged_scores, 0.95)
 
-        merged_scores = torch.cat([d['scores'] for d in outputs])
-        min_value = torch.min(merged_scores)
-        max_value = torch.max(merged_scores)
-        percentile_50 = torch.quantile(merged_scores, 0.5)
-        percentile_95 = torch.quantile(merged_scores, 0.95)
+            # Convert tensors to numpy arrays for easy printing
+            min_value, max_value, percentile_50, percentile_95 = min_value.numpy(), max_value.numpy(), percentile_50.numpy(), percentile_95.numpy()
 
-        # Convert tensors to numpy arrays for easy printing
-        min_value, max_value, percentile_50, percentile_95 = min_value.numpy(), max_value.numpy(), percentile_50.numpy(), percentile_95.numpy()
-
-        print(f"Min Conf: {min_value}")
-        loss_dict['min_conf'] = min_value
-        print(f"Max Conf: {max_value}")
-        loss_dict['max_conf'] = max_value
-        print(f"50th Percentile: {percentile_50}")
-        loss_dict['50th_conf'] = percentile_50
-        print(f"95th Percentile: {percentile_95}")
-        loss_dict['95th_conf'] = percentile_95
+            print(f"Min Conf: {min_value}")
+            loss_dict['min_conf'] = min_value
+            print(f"Max Conf: {max_value}")
+            loss_dict['max_conf'] = max_value
+            print(f"50th Percentile: {percentile_50}")
+            loss_dict['50th_conf'] = percentile_50
+            print(f"95th Percentile: {percentile_95}")
+            loss_dict['95th_conf'] = percentile_95
         # print(outputs)# boxes, scores, labels
         # print(targets)# boxes, labels, image_id, area
         result = [
