@@ -456,8 +456,8 @@ class ObjectDetectionTrial(PyTorchTrial):
         merged_scores = torch.cat([d['scores'] for d in outputs])
         min_value = torch.min(merged_scores)
         max_value = torch.max(merged_scores)
-        percentile_50 = torch.percentile(merged_scores, 50)
-        percentile_95 = torch.percentile(merged_scores, 95)
+        percentile_50 = torch.quantile(merged_scores, 50)
+        percentile_95 = torch.quantile(merged_scores, 95)
 
         # Convert tensors to numpy arrays for easy printing
         min_value, max_value, percentile_50, percentile_95 = min_value.numpy(), max_value.numpy(), percentile_50.numpy(), percentile_95.numpy()
