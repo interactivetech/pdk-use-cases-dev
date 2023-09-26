@@ -5,6 +5,9 @@ import torch
 from determined.experimental import Determined
 from determined.pytorch import load_trial_from_checkpoint_path
 import json
+import torchvision
+print("TORCHVISION: {}".format(torchvision.__version__))
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from kserve import KServeClient
 from common import (
     upload_model,
@@ -41,6 +44,41 @@ def generate_model_file(template_file: str,output_file: str, num_classes: int):
     # Save the updated template as the output file
     with open(output_file, 'w') as output:
         output.write(updated_template)
+# =====================================================================================
+
+def build_frcnn_model_finetune(num_classes,ckpt=None):
+    print("Loading pretrained model from {}...".format(ckpt))
+    # load an detection model pre-trained on COCO
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False)
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+    print("Loading checkpoint...")
+    model=load_model_ddp(model,ckpt)
+    print("Done!")
+    return model
+
+# =====================================================================================
+def load_model_ddp(loaded_model,model_state_dict):
+    '''
+    '''
+    try:
+        loaded_model.load_state_dict(model_state_dict)
+    except Exception:
+        # If the checkpointed model is non-DDP and the current model is DDP, append
+        # module prefix to the checkpointed data
+        if isinstance(loaded_model, torch.nn.parallel.DistributedDataParallel):
+            print("Loading non-DDP checkpoint into a DDP model.")
+            self._add_prefix_in_state_dict_if_not_present(model_state_dict, "module.")
+        else:
+            # If the checkpointed model is DDP and if we are currently running in
+            # single-slot mode, remove the module prefix from checkpointed data
+            print("Loading DDP checkpoint into a non-DDP model.")
+            torch.nn.modules.utils.consume_prefix_in_state_dict_if_present(
+                model_state_dict, "module."
+            )
+        loaded_model.load_state_dict(model_state_dict)
+    return loaded_model
 # =====================================================================================
 def create_model_file_and_json(path, template_file, output_file):
     '''
@@ -93,15 +131,22 @@ def create_scriptmodule(det_master, det_user, det_pw, model_name, pach_id):
     version = get_version(client, model_name, pach_id)
     checkpoint = version.checkpoint
     checkpoint_dir = checkpoint.download()
-    trial = load_trial_from_checkpoint_path(
-        checkpoint_dir, map_location=torch.device("cpu")
-    )
+    model_state_dict = torch.load(path + '/state_dict.pth',map_location=torch.device('cpu'))
+    index_to_name_json = model_state_dict['index_to_name']
+    n_classes = len(list(index_to_name_json.keys()))
+    print("--n_classes:", n_classes)
+    ckpt = model_state_dict['models_state_dict'][0]
+    model = build_frcnn_model_finetune(num_classes=n_classes,ckpt=model_state_dict)
+    # trial = load_trial_from_checkpoint_path(
+    #     checkpoint_dir, map_location=torch.device("cpu")
+    # )
+    
     end = time.time()
     delta = end - start
     print(f"Checkpoint loaded in {delta} seconds.")
 
     print(f"Creating ScriptModule from Determined checkpoint...")
-    model = trial.model
+    # model = trial.model
     model.eval()
     
     # 9.12.23: get index_to_name dictionary saved in checkpoint
