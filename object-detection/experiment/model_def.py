@@ -421,7 +421,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         return data_loader_test
     
     def train_batch(self, batch: TorchData, epoch_idx: int, batch_idx: int) -> Dict[str, torch.Tensor]:
-        print("(train_batch) Is model training mode?: ",model.training)
+        print("(train_batch) Is model training mode?: ",self.model.training)
 
         batch_time_start = time.time()
         images, targets = batch
@@ -441,7 +441,7 @@ class ObjectDetectionTrial(PyTorchTrial):
         return loss_dict
     
     def evaluate_batch(self, batch: TorchData,batch_idx: int) -> Dict[str, Any]:
-        print("(evaluate_batch) Is model training mode?: ",model.training)
+        print("(evaluate_batch) Is model training mode?: ",self.model.training)
         images, targets = batch
         model_time_start = time.time()
         # loss_dict, outputs = self.model(images, targets)
