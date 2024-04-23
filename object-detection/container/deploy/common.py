@@ -209,7 +209,7 @@ def create_inference_service(
     tolerations=None,
     resource_requirements={"requests": {}, "limits": {}},
     sa=None,
-    version="v2"
+    version="v2",
     torchserve_image='pytorch/torchserve-kfs:0.7.0'  # Add image here as a parameter
 ):
     repo = os.environ["PPS_PIPELINE_NAME"]
