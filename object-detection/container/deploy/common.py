@@ -255,12 +255,14 @@ def create_inference_service(
             ),
         )
     else:
+        print("non cloud deployment...")
         predictor_spec = V1beta1PredictorSpec(
             tolerations=tol,
             pytorch=(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{commit}.master.{repo}.{project}/{model_name}",
+                    image='pytorch/torchserve-kfs:0.9.0',
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
