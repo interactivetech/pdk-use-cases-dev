@@ -262,7 +262,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{commit}.master.{repo}.{project}/{model_name}",
-                    image='pytorch/torchserve-kfs:0.9.0',
+                    image='pytorch/torchserve-kfs:0.6.1',
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
