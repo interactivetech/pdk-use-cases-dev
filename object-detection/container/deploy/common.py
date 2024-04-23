@@ -85,6 +85,12 @@ def parse_args():
         help="",
         default=None,
     )
+    parser.add_argument(
+        "--torchserve-image",
+        type=str,
+        help="Docker image for deploying the KServe InferenceService",
+        default="pytorch/torchserve-kfs:0.7.0",  # Provide a default value
+    )
     return parser.parse_args()
 
 
@@ -204,6 +210,7 @@ def create_inference_service(
     resource_requirements={"requests": {}, "limits": {}},
     sa=None,
     version="v2"
+    torchserve_image='pytorch/torchserve-kfs:0.7.0'  # Add image here as a parameter
 ):
     repo = os.environ["PPS_PIPELINE_NAME"]
     project = os.environ["PPS_PROJECT_NAME"]
@@ -211,6 +218,7 @@ def create_inference_service(
     kserve_version = "v1beta1"
     api_version = constants.KSERVE_GROUP + "/" + kserve_version
     tol = []
+    print("Using {} as torchserve image...".format(torchserve_image))
     if tolerations:
         for toleration in tolerations:
             key, value = toleration.split("=")
@@ -229,6 +237,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"gs://{bucket_name}/{model_name}",
+                    image=image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
@@ -245,6 +254,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{bucket_name}/{model_name}",
+                    image=image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
@@ -262,7 +272,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{commit}.master.{repo}.{project}/{model_name}",
-                    image='pytorch/torchserve-kfs:0.6.1',
+                    image=image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],

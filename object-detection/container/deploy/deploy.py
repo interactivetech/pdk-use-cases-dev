@@ -284,6 +284,7 @@ def main():
         resource_requirements,
         args.service_account_name,
         "v1",
+        args.torchserve_image
     )
     if args.wait and args.cloud_model_host:
         # Wait for InferenceService to be ready for predictions
