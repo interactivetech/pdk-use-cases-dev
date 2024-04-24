@@ -16,7 +16,7 @@
       "/bin/sh"
     ],
     "stdin": [
-      "python deploy.py --deployment-name detection-deploy --service-account-name pach-deploy --tolerations accelerator=Tesla-T4 --resource-requests cpu=10,memory=8Gi --resource-limits cpu=10,memory=8Gi --torchserve-image=\"pytorch/torchserve-kfs:0.6.1\""
+      "python deploy.py --deployment-name detection-deploy --service-account-name pach-deploy --tolerations accelerator=Tesla-T4 --resource-requests cpu=10,memory=8Gi --resource-limits cpu=10,memory=8Gi,nvidia.com/gpu=1 --torchserve-image=\"pytorch/torchserve-kfs:0.7.0\""
     ],
     "image": "mendeza/pdk:deploy_0.0.37",
     "secrets": [
