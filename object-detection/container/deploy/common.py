@@ -237,7 +237,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"gs://{bucket_name}/{model_name}",
-                    image=image,  # Use the image argument
+                    image=torchserve_image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
@@ -254,7 +254,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{bucket_name}/{model_name}",
-                    image=image,  # Use the image argument
+                    image=torchserve_image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
@@ -272,7 +272,7 @@ def create_inference_service(
                 V1beta1TorchServeSpec(
                     protocol_version=version,
                     storage_uri=f"s3://{commit}.master.{repo}.{project}/{model_name}",
-                    image=image,  # Use the image argument
+                    image=torchserve_image,  # Use the image argument
                     resources=(
                         V1ResourceRequirements(
                             requests=resource_requirements["requests"],
